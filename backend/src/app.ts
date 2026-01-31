@@ -97,6 +97,9 @@ export async function buildApp() {
   const { applicationsRoutes } = await import('./modules/applications/applications.routes');
   await app.register(applicationsRoutes, { prefix: '/api/v1' });
 
+  const { testsRoutes } = await import('./modules/tests/tests.routes');
+  await app.register(testsRoutes, { prefix: '/api/v1' });
+
   // Error handler
   app.setErrorHandler((error, request, reply) => {
     request.log.error(error);
