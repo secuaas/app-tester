@@ -5,6 +5,7 @@ import Layout from './components/Layout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Applications from './pages/Applications';
+import Tests from './pages/Tests';
 
 function App() {
   return (
@@ -27,6 +28,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout><Applications /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/tests"
+            element={
+              <ProtectedRoute>
+                <Layout><Tests /></Layout>
               </ProtectedRoute>
             }
           />
