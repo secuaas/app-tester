@@ -10,6 +10,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "seed:admin": "tsx src/scripts/create-admin.ts",
     "test": "vitest",
     "lint": "eslint src --ext .ts"
   },

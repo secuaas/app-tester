@@ -82,13 +82,17 @@ export async function buildApp() {
     };
   });
 
-  // API Routes (will be added)
+  // API Routes
   app.get('/api/v1', async () => {
     return {
       message: 'TestForge API v1',
       docs: '/docs',
     };
   });
+
+  // Register module routes
+  const { authRoutes } = await import('./modules/auth/auth.routes');
+  await app.register(authRoutes, { prefix: '/api/v1' });
 
   // Error handler
   app.setErrorHandler((error, request, reply) => {
