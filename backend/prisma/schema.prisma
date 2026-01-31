@@ -1,0 +1,257 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============== USERS ==============
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String   // bcrypt hashed
+  role      UserRole @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  apiKeys ApiKey[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  VIEWER
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  keyHash     String    @unique
+  prefix      String    // First 12 chars for identification
+  permissions String[]
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  userId      String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+// ============== APPLICATIONS ==============
+
+model Application {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  type        AppType
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  environments Environment[]
+  testSuites   TestSuite[]
+  credentials  Credential[]
+
+  @@map("applications")
+}
+
+enum AppType {
+  API
+  WEB
+  HYBRID
+}
+
+model Environment {
+  id            String   @id @default(cuid())
+  name          String   // dev, staging, prod
+  baseUrl       String
+  isActive      Boolean  @default(true)
+  applicationId String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  executions  Execution[]
+  credentials Credential[]
+
+  @@unique([applicationId, name])
+  @@map("environments")
+}
+
+// ============== TESTS ==============
+
+model TestSuite {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  timeout       Int      @default(300) // seconds
+  tags          String[] @default([])
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  applicationId String
+  credentialId  String?  // Default credential to use
+
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  steps       TestStep[]
+  executions  Execution[]
+
+  @@unique([applicationId, name])
+  @@map("test_suites")
+}
+
+model TestStep {
+  id              String   @id @default(cuid())
+  name            String
+  type            StepType
+  order           Int
+  config          Json     // API or Web step configuration
+  timeout         Int?     // Override suite timeout
+  continueOnError Boolean  @default(false)
+  testSuiteId     String
+
+  testSuite TestSuite @relation(fields: [testSuiteId], references: [id], onDelete: Cascade)
+
+  @@map("test_steps")
+}
+
+enum StepType {
+  API
+  WEB
+}
+
+// ============== EXECUTIONS ==============
+
+model Execution {
+  id            String          @id @default(cuid())
+  status        ExecutionStatus
+  startedAt     DateTime        @default(now())
+  completedAt   DateTime?
+  duration      Int?            // milliseconds
+  triggeredBy   String          // user ID or "api" or "scheduler" or "claude"
+  options       Json            // ExecutionOptions
+  summary       Json?           // { total, passed, failed, skipped }
+  testSuiteId   String
+  environmentId String
+
+  testSuite   TestSuite    @relation(fields: [testSuiteId], references: [id])
+  environment Environment  @relation(fields: [environmentId], references: [id])
+  stepResults StepResult[]
+  artifacts   Artifact[]
+
+  @@index([status])
+  @@index([startedAt])
+  @@index([testSuiteId])
+  @@map("executions")
+}
+
+enum ExecutionStatus {
+  PENDING
+  RUNNING
+  PASSED
+  FAILED
+  ERROR
+  CANCELLED
+}
+
+model StepResult {
+  id          String          @id @default(cuid())
+  stepName    String
+  stepType    StepType
+  status      ExecutionStatus
+  startedAt   DateTime
+  completedAt DateTime
+  duration    Int             // milliseconds
+  request     Json?           // For API steps
+  response    Json?           // For API steps
+  assertions  Json            // Array of assertion results
+  error       String?
+  executionId String
+
+  execution Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@map("step_results")
+}
+
+model Artifact {
+  id          String       @id @default(cuid())
+  type        ArtifactType
+  name        String
+  path        String       // S3/MinIO path
+  size        Int          // bytes
+  mimeType    String
+  createdAt   DateTime     @default(now())
+  executionId String
+
+  execution Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@map("artifacts")
+}
+
+enum ArtifactType {
+  SCREENSHOT
+  REPORT_HTML
+  REPORT_PDF
+  REPORT_JSON
+  LOG
+}
+
+// ============== CREDENTIALS ==============
+
+model Credential {
+  id            String         @id @default(cuid())
+  name          String
+  type          CredentialType
+  encryptedData Bytes          // AES-256-GCM encrypted
+  iv            Bytes          // Initialization vector (12 bytes)
+  metadata      Json?          // Non-sensitive metadata
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  applicationId String
+  environmentId String?
+
+  application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  environment Environment? @relation(fields: [environmentId], references: [id])
+
+  @@unique([applicationId, environmentId, name])
+  @@map("credentials")
+}
+
+enum CredentialType {
+  BASIC
+  API_KEY
+  JWT
+  OAUTH2
+  CERTIFICATE
+}
+
+// ============== AUDIT ==============
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  action     String
+  entityType String
+  entityId   String
+  userId     String?
+  ipAddress  String?
+  userAgent  String?
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
