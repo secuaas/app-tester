@@ -610,8 +610,13 @@ export class TestsService {
       },
     });
 
-    // TODO: Queue execution for processing
-    // This will be handled by the execution engine module
+    // Execute asynchronously (fire and forget)
+    // Import dynamically to avoid circular dependencies
+    import('../execution/execution-orchestrator.service').then(({ executionOrchestrator }) => {
+      executionOrchestrator.executeTestSuite(execution.id, userId).catch((error) => {
+        console.error(`Execution ${execution.id} failed:`, error);
+      });
+    });
 
     return execution;
   }
