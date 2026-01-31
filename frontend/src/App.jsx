@@ -6,6 +6,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Applications from './pages/Applications';
 import Tests from './pages/Tests';
+import Executions from './pages/Executions';
+import Credentials from './pages/Credentials';
 
 function App() {
   return (
@@ -37,6 +39,24 @@ function App() {
             element={
               <ProtectedRoute>
                 <Layout><Tests /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/executions"
+            element={
+              <ProtectedRoute>
+                <Layout><Executions /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/credentials"
+            element={
+              <ProtectedRoute>
+                <Layout><Credentials /></Layout>
               </ProtectedRoute>
             }
           />
