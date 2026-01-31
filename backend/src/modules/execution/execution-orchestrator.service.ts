@@ -179,7 +179,7 @@ export class ExecutionOrchestrator {
           details: {
             status: overallStatus,
             summary,
-          },
+          } as any,
         },
       });
     } catch (error: any) {

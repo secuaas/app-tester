@@ -4,6 +4,7 @@ import { config } from '../../config';
 export interface EncryptedCredential {
   iv: Buffer;
   encryptedData: Buffer;
+  authTag: Buffer;
 }
 
 export class EncryptionService {
@@ -24,12 +25,14 @@ export class EncryptionService {
    * Derive a key specific to the application using HKDF
    */
   private deriveKey(applicationId: string): Buffer {
-    return crypto.hkdfSync(
-      'sha256',
-      this.masterKey,
-      this.SALT,
-      applicationId,
-      32
+    return Buffer.from(
+      crypto.hkdfSync(
+        'sha256',
+        this.masterKey,
+        this.SALT,
+        applicationId,
+        32
+      )
     );
   }
 
@@ -54,7 +57,8 @@ export class EncryptionService {
 
     return {
       iv,
-      encryptedData: Buffer.concat([encrypted, authTag]),
+      encryptedData: encrypted,
+      authTag,
     };
   }
 
@@ -62,23 +66,18 @@ export class EncryptionService {
    * Decrypt credential data
    */
   async decrypt(
-    encryptedData: Buffer,
-    iv: Buffer,
+    encrypted: EncryptedCredential,
     applicationId: string
   ): Promise<object> {
     const derivedKey = this.deriveKey(applicationId);
 
-    // Separate ciphertext and auth tag
-    const authTag = encryptedData.slice(-this.AUTH_TAG_LENGTH);
-    const ciphertext = encryptedData.slice(0, -this.AUTH_TAG_LENGTH);
-
-    const decipher = crypto.createDecipheriv(this.ALGORITHM, derivedKey, iv, {
+    const decipher = crypto.createDecipheriv(this.ALGORITHM, derivedKey, encrypted.iv, {
       authTagLength: this.AUTH_TAG_LENGTH,
     });
-    decipher.setAuthTag(authTag);
+    decipher.setAuthTag(encrypted.authTag);
 
     const decrypted = Buffer.concat([
-      decipher.update(ciphertext),
+      decipher.update(encrypted.encryptedData),
       decipher.final(),
     ]);
 

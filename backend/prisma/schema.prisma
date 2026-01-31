@@ -84,7 +84,6 @@ model Environment {
 
   application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   executions  Execution[]
-  credentials Credential[]
 
   @@unique([applicationId, name])
   @@map("environments")
@@ -96,6 +95,7 @@ model TestSuite {
   id            String   @id @default(cuid())
   name          String
   description   String?
+  type          TestType @default(API)
   timeout       Int      @default(300) // seconds
   tags          String[] @default([])
   isActive      Boolean  @default(true)
@@ -112,24 +112,42 @@ model TestSuite {
   @@map("test_suites")
 }
 
-model TestStep {
-  id              String   @id @default(cuid())
-  name            String
-  type            StepType
-  order           Int
-  config          Json     // API or Web step configuration
-  timeout         Int?     // Override suite timeout
-  continueOnError Boolean  @default(false)
-  testSuiteId     String
+enum TestType {
+  API
+  E2E
+}
 
-  testSuite TestSuite @relation(fields: [testSuiteId], references: [id], onDelete: Cascade)
+model TestStep {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  order            Int
+  endpoint         String
+  method           HttpMethod
+  headers          Json?             // Record<string, string>
+  body             Json?             // any
+  assertions       Json              @default("[]") // Assertion[]
+  extractVariables Json              @default("[]") // VariableExtractor[]
+  timeout          Int?              // Override suite timeout
+  continueOnError  Boolean           @default(false)
+  testSuiteId      String
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  testSuite   TestSuite    @relation(fields: [testSuiteId], references: [id], onDelete: Cascade)
+  stepResults StepResult[]
 
   @@map("test_steps")
 }
 
-enum StepType {
-  API
-  WEB
+enum HttpMethod {
+  GET
+  POST
+  PUT
+  PATCH
+  DELETE
+  HEAD
+  OPTIONS
 }
 
 // ============== EXECUTIONS ==============
@@ -140,14 +158,16 @@ model Execution {
   startedAt     DateTime        @default(now())
   completedAt   DateTime?
   duration      Int?            // milliseconds
-  triggeredBy   String          // user ID or "api" or "scheduler" or "claude"
-  options       Json            // ExecutionOptions
+  triggeredBy   String          @default("manual") // user ID or "api" or "scheduler" or "claude"
+  variables     Json?           // Runtime variables
   summary       Json?           // { total, passed, failed, skipped }
   testSuiteId   String
   environmentId String
+  credentialId  String?
 
   testSuite   TestSuite    @relation(fields: [testSuiteId], references: [id])
   environment Environment  @relation(fields: [environmentId], references: [id])
+  credential  Credential?  @relation(fields: [credentialId], references: [id])
   stepResults StepResult[]
   artifacts   Artifact[]
 
@@ -163,24 +183,24 @@ enum ExecutionStatus {
   PASSED
   FAILED
   ERROR
-  CANCELLED
 }
 
 model StepResult {
-  id          String          @id @default(cuid())
-  stepName    String
-  stepType    StepType
-  status      ExecutionStatus
-  startedAt   DateTime
-  completedAt DateTime
-  duration    Int             // milliseconds
-  request     Json?           // For API steps
-  response    Json?           // For API steps
-  assertions  Json            // Array of assertion results
-  error       String?
-  executionId String
+  id                String          @id @default(cuid())
+  status            ExecutionStatus
+  startedAt         DateTime
+  completedAt       DateTime
+  duration          Int             // milliseconds
+  request           Json?           // { method, url, headers, body }
+  response          Json?           // { status, headers, body, time }
+  assertions        Json            @default("[]") // AssertionResult[]
+  extractedVariables Json           @default("{}") // Record<string, any>
+  error             String?
+  executionId       String
+  testStepId        String
 
   execution Execution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+  testStep  TestStep  @relation(fields: [testStepId], references: [id])
 
   @@map("step_results")
 }
@@ -216,25 +236,24 @@ model Credential {
   type          CredentialType
   encryptedData Bytes          // AES-256-GCM encrypted
   iv            Bytes          // Initialization vector (12 bytes)
-  metadata      Json?          // Non-sensitive metadata
+  authTag       Bytes          // Authentication tag (16 bytes)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   applicationId String
-  environmentId String?
 
   application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
-  environment Environment? @relation(fields: [environmentId], references: [id])
+  executions  Execution[]
 
-  @@unique([applicationId, environmentId, name])
+  @@unique([applicationId, name])
   @@map("credentials")
 }
 
 enum CredentialType {
-  BASIC
   API_KEY
-  JWT
+  BASIC_AUTH
+  BEARER_TOKEN
   OAUTH2
-  CERTIFICATE
+  CUSTOM_HEADERS
 }
 
 // ============== AUDIT ==============

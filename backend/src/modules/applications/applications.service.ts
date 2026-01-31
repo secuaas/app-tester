@@ -214,7 +214,7 @@ export class ApplicationsService {
         entityType: 'Application',
         entityId: id,
         userId,
-        details: data,
+        details: data as any,
       },
     });
 
@@ -388,7 +388,7 @@ export class ApplicationsService {
         entityType: 'Environment',
         entityId: id,
         userId,
-        details: data,
+        details: data as any,
       },
     });
 

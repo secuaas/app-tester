@@ -44,8 +44,8 @@ export class TestsService {
                 method: step.method,
                 headers: step.headers || {},
                 body: step.body || null,
-                assertions: step.assertions || [],
-                extractVariables: step.extractVariables || [],
+                assertions: (step.assertions || []) as any,
+                extractVariables: (step.extractVariables || []) as any,
               })),
             }
           : undefined,
@@ -234,7 +234,7 @@ export class TestsService {
         entityType: 'TestSuite',
         entityId: id,
         userId,
-        details: data,
+        details: data as any,
       },
     });
 
@@ -355,10 +355,10 @@ export class TestsService {
         order: data.order,
         endpoint: data.endpoint,
         method: data.method,
-        headers: data.headers || {},
+        headers: (data.headers || {}) as any,
         body: data.body || null,
-        assertions: data.assertions || [],
-        extractVariables: data.extractVariables || [],
+        assertions: (data.assertions || []) as any,
+        extractVariables: (data.extractVariables || []) as any,
       },
     });
 
@@ -388,10 +388,10 @@ export class TestsService {
         order: data.order,
         endpoint: data.endpoint,
         method: data.method,
-        headers: data.headers,
-        body: data.body,
-        assertions: data.assertions,
-        extractVariables: data.extractVariables,
+        headers: data.headers as any,
+        body: data.body as any,
+        assertions: data.assertions as any,
+        extractVariables: data.extractVariables as any,
       },
     });
 
@@ -402,7 +402,7 @@ export class TestsService {
         entityType: 'TestStep',
         entityId: id,
         userId,
-        details: data,
+        details: data as any,
       },
     });
 
@@ -643,7 +643,7 @@ export class TestsService {
           },
         },
         stepResults: {
-          orderBy: { createdAt: 'asc' },
+          orderBy: { startedAt: 'asc' },
         },
         artifacts: true,
       },

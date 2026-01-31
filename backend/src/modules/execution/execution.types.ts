@@ -15,7 +15,7 @@ export interface ExecutionContext {
 export interface StepExecutionResult {
   stepId: string;
   stepName: string;
-  status: 'PASSED' | 'FAILED' | 'SKIPPED';
+  status: 'PASSED' | 'FAILED' | 'ERROR';
   startedAt: Date;
   completedAt: Date;
   duration: number;
