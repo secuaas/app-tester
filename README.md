@@ -19,11 +19,25 @@ TestForge est une plateforme centralisée de tests automatisés pour application
 
 **Stats**: 43 endpoints API, 11 modèles DB, ~4800 lignes TypeScript, 10/10 tests passing
 
+### ✅ Frontend React (100% implémenté)
+
+- 🎨 **Interface moderne** : React 18 + TailwindCSS + Vite
+- 🔐 **Authentication UI** : Login avec JWT auto-refresh
+- 📊 **Dashboard** : Stats en temps réel et actions rapides
+- 🔧 **Applications Management** : CRUD complet avec health checks
+- 🧪 **Test Suites Editor** : Éditeur visuel de steps avec drag & drop
+- ▶️ **Executions Viewer** : Monitoring temps réel avec auto-refresh
+- 🔑 **Credentials Manager** : Interface sécurisée avec décryptage on-demand
+- 📝 **Test Detail Page** : Éditeur JSON de configuration steps
+- 📊 **Execution Detail Page** : Résultats détaillés step par step avec screenshots
+- 🎯 **Responsive Design** : Mobile-first avec sidebar adaptative
+
+**Stats**: 7 pages, 15+ composants réutilisables, ~3500 lignes React/JSX
+
 ### 🚧 À venir
 
-- 🌐 **Tests Web (E2E)** : Tests Playwright pour interfaces web (Phase 2)
-- 📊 **Rapports avancés** : HTML, PDF, JUnit XML (Phase 2)
-- 🤖 **Intégration Claude (MCP)** : Tests pilotés par IA (Phase 2)
+- 🤖 **Intégration Claude (MCP)** : Tests pilotés par IA (Phase 3)
+- 📊 **Rapports avancés** : HTML, PDF, JUnit XML (Phase 3)
 - 🔄 **CI/CD Ready** : Webhooks et scheduling (Phase 3)
 
 ## Quick Start
@@ -93,13 +107,29 @@ Ce script teste tous les endpoints principaux et valide:
 
 Résultat attendu: **10/10 tests passing ✅**
 
-### Frontend (à venir)
+### Frontend
 
 ```bash
 cd frontend
 npm install
+cp .env.example .env  # Configurer VITE_API_URL si nécessaire
 npm run dev
 ```
+
+Le frontend sera disponible sur `http://localhost:5173`.
+
+**Credentials par défaut** (après création admin backend):
+- Email: `admin@secuaas.ca`
+- Password: `TestForge2026!`
+
+**Pages disponibles:**
+- `/` - Dashboard avec stats et actions rapides
+- `/applications` - Gestion des applications
+- `/tests` - Liste des test suites
+- `/tests/:id` - Éditeur de test avec steps
+- `/executions` - Historique d'exécutions
+- `/executions/:id` - Détails d'exécution avec résultats
+- `/credentials` - Gestion sécurisée des credentials
 
 ## Architecture
 
@@ -107,15 +137,22 @@ npm run dev
 app-tester/
 ├── backend/          # API Fastify + TypeScript
 │   ├── src/
-│   │   ├── modules/  # Modules métier
-│   │   ├── engine/   # Moteur d'exécution
-│   │   ├── common/   # Utils, middleware
-│   │   └── config/   # Configuration
-│   └── prisma/       # Schema DB
-├── frontend/         # React + TailwindCSS (à venir)
-├── docs/             # Documentation
-└── deploy/           # Kubernetes manifests
-
+│   │   ├── modules/  # Modules métier (Auth, Apps, Tests, Exec, Creds)
+│   │   ├── engine/   # Moteur d'exécution asynchrone
+│   │   ├── common/   # Utils, middleware, types
+│   │   └── config/   # Configuration et validation
+│   ├── prisma/       # Schema DB (11 models)
+│   └── scripts/      # Scripts d'administration
+├── frontend/         # React 18 + Vite + TailwindCSS
+│   ├── src/
+│   │   ├── pages/        # 7 pages principales
+│   │   ├── components/   # Composants réutilisables
+│   │   ├── contexts/     # Auth context avec JWT
+│   │   ├── services/     # API client Axios
+│   │   └── hooks/        # Custom React hooks
+│   └── public/       # Assets statiques
+├── docs/             # Documentation technique
+└── deploy/           # Kubernetes manifests (à venir)
 ```
 
 ## Documentation
@@ -148,7 +185,7 @@ npm test             # Tests unitaires
 
 ## Roadmap
 
-### Phase 1 : MVP Backend (✅ TERMINÉE)
+### Phase 1 : Backend API (✅ 100% TERMINÉE)
 - [x] Setup projet & architecture
 - [x] Schéma DB et Prisma (11 models)
 - [x] Configuration backend
@@ -161,20 +198,32 @@ npm test             # Tests unitaires
 - [x] Health monitoring
 - [x] 43 endpoints API fonctionnels
 - [x] Tests automatisés (10/10 passing)
-- [ ] Interface web (Phase 2)
-- [ ] Intégration MCP Claude (Phase 2)
 
-### Phase 2 : Tests Web (2-3 semaines)
-- [ ] Moteur Playwright
-- [ ] Actions web et assertions
-- [ ] Captures d'écran
-- [ ] Éditeur visuel
+### Phase 2 : Frontend React (✅ 100% TERMINÉE)
+- [x] Setup Vite + React 18 + TailwindCSS
+- [x] Authentication flow avec JWT refresh
+- [x] Dashboard avec stats temps réel
+- [x] Applications management (CRUD + health)
+- [x] Test Suites management (liste + éditeur)
+- [x] Test Detail avec éditeur de steps
+- [x] Executions viewer avec monitoring
+- [x] Execution Detail avec résultats step-by-step
+- [x] Credentials manager sécurisé
+- [x] Composants réutilisables (Modal, Button, Badge)
+- [x] Layout responsive avec sidebar
+- [x] 7 pages complètes + 15 composants
 
-### Phase 3 : Production Ready (2-3 semaines)
-- [ ] Scheduling & cron
+### Phase 3 : MCP Server & Advanced Features (En cours)
+- [ ] MCP Server pour intégration Claude
+- [ ] Tests pilotés par IA via prompts
+- [ ] Génération automatique de tests
+- [ ] Moteur Playwright pour tests E2E web
+- [ ] Scheduling & cron jobs
+- [ ] Rapports avancés (HTML, PDF, JUnit)
 - [ ] Métriques et alerting
-- [ ] Documentation complète
-- [ ] Tests & hardening sécurité
+- [ ] CI/CD webhooks
+- [ ] Tests E2E frontend (Playwright/Cypress)
+- [ ] Documentation utilisateur complète
 
 ## Support
 
