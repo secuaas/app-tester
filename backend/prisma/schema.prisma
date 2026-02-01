@@ -82,8 +82,9 @@ model Environment {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  application Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   executions  Execution[]
+  schedules   TestSchedule[]
 
   @@unique([applicationId, name])
   @@map("environments")
@@ -104,9 +105,10 @@ model TestSuite {
   applicationId String
   credentialId  String?  // Default credential to use
 
-  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  application Application    @relation(fields: [applicationId], references: [id], onDelete: Cascade)
   steps       TestStep[]
   executions  Execution[]
+  schedules   TestSchedule[]
 
   @@unique([applicationId, name])
   @@map("test_suites")
@@ -273,4 +275,59 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+// ============== SCHEDULING ==============
+
+model TestSchedule {
+  id             String   @id @default(cuid())
+  testId         String
+  environmentId  String
+  cronExpression String   // Cron format: "0 0 * * *"
+  isActive       Boolean  @default(true)
+  lastRunAt      DateTime?
+  nextRunAt      DateTime?
+  errorCount     Int      @default(0)
+  lastError      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  test        Test        @relation(fields: [testId], references: [id], onDelete: Cascade)
+  environment Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
+
+  @@map("test_schedules")
+}
+
+// ============== WEBHOOKS ==============
+
+model Webhook {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  events    String[] // Array of event names
+  secret    String   // HMAC secret for signature
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  logs WebhookLog[]
+
+  @@map("webhooks")
+}
+
+model WebhookLog {
+  id              String   @id @default(cuid())
+  webhookId       String
+  event           String
+  status          String   // SUCCESS, FAILED
+  statusCode      Int?
+  requestPayload  Json
+  responseBody    Json?
+  error           String?
+  createdAt       DateTime @default(now())
+
+  webhook Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId, createdAt])
+  @@map("webhook_logs")
 }
