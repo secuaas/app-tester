@@ -58,8 +58,6 @@ spec:
       labels:
         app: backend
     spec:
-      imagePullSecrets:
-        - name: ghcr-secret
       initContainers:
         - name: wait-for-postgres
           image: busybox:latest
@@ -83,7 +81,7 @@ spec:
               done
       containers:
         - name: backend
-          image: ghcr.io/secuaas/testforge-backend:latest
+          image: qq9o8vqe.c1.bhs5.container-registry.ovh.net/secuops/testforge-backend:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

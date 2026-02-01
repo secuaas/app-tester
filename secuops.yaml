@@ -1,0 +1,249 @@
+# TestForge - SecuOps Configuration
+# Plateforme de tests automatisés API & E2E
+
+app:
+  name: testforge
+  description: "Plateforme de tests automatisés avec support API et E2E"
+  version: "1.0.0"
+  type: platform
+  language: multi
+
+  maintainer:
+    name: "SecuAAS Team"
+    email: "support@secuaas.ca"
+
+  repository:
+    url: "https://github.com/secuaas/app-tester"
+    branch: main
+
+# Services definition
+services:
+  backend:
+    type: api
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: qq9o8vqe.c1.bhs5.container-registry.ovh.net/secuops/testforge-backend
+    port: 3000
+    healthcheck:
+      path: /health
+      port: 3000
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    type: web
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+    image: qq9o8vqe.c1.bhs5.container-registry.ovh.net/secuops/testforge-frontend
+    port: 80
+    healthcheck:
+      path: /health
+      port: 80
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  postgres:
+    type: database
+    image: postgres:16-alpine
+    port: 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    healthcheck:
+      command: pg_isready -U testforge -d testforge
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    type: cache
+    image: redis:7-alpine
+    port: 6379
+    command: redis-server --appendonly yes
+    healthcheck:
+      command: redis-cli ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    type: storage
+    image: minio/minio:latest
+    port: 9000
+    console_port: 9001
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      command: curl -f http://localhost:9000/minio/health/live
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+# Configuration par environnement
+environments:
+  k8s-dev:
+    domain: testforge.secuaas.dev
+    namespace: testforge
+    replicas:
+      backend: 1
+      frontend: 1
+    resources:
+      backend:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+      frontend:
+        requests:
+          cpu: "50m"
+          memory: "64Mi"
+        limits:
+          cpu: "100m"
+          memory: "128Mi"
+      postgres:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      redis:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+      minio:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "200m"
+          memory: "512Mi"
+    storage:
+      postgres: 10Gi
+      minio: 20Gi
+      storageClass: csi-cinder-high-speed
+    manifests_dir: k8s
+    ssl:
+      enabled: true
+      certresolver: letsencrypt
+
+  k8s-prod:
+    domain: testforge.secuaas.ca
+    namespace: testforge
+    replicas:
+      backend: 2
+      frontend: 2
+    resources:
+      backend:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      frontend:
+        requests:
+          cpu: "100m"
+          memory: "128Mi"
+        limits:
+          cpu: "200m"
+          memory: "256Mi"
+      postgres:
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+        limits:
+          cpu: "1000m"
+          memory: "1Gi"
+      redis:
+        requests:
+          cpu: "250m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      minio:
+        requests:
+          cpu: "250m"
+          memory: "512Mi"
+        limits:
+          cpu: "500m"
+          memory: "1Gi"
+    storage:
+      postgres: 50Gi
+      minio: 100Gi
+      storageClass: csi-cinder-high-speed-gen2
+    manifests_dir: k8s
+    ssl:
+      enabled: true
+      certresolver: letsencrypt
+
+# Routing configuration
+routing:
+  entrypoints:
+    - websecure
+  routes:
+    - name: api
+      path: /api/v1
+      priority: 100
+      service: backend
+    - name: backend-health
+      path: /health
+      priority: 100
+      service: backend
+    - name: docs
+      path: /docs
+      priority: 100
+      service: backend
+    - name: metrics
+      path: /metrics
+      priority: 100
+      service: backend
+    - name: frontend
+      path: /
+      priority: 10
+      service: frontend
+
+# Volumes
+volumes:
+  postgres_data:
+    driver: local
+  minio_data:
+    driver: local
+
+# Networks
+networks:
+  internal:
+    driver: bridge
+    name: testforge-network
+
+# Deployment configuration
+deployment:
+  strategy: rolling
+  max_surge: 1
+  max_unavailable: 0
+  rollback_on_failure: true
+
+# Monitoring
+monitoring:
+  enabled: true
+  endpoints:
+    health: /health
+    metrics: /metrics
+
+# Logging
+logging:
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"

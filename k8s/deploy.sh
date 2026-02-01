@@ -32,29 +32,8 @@ export SECUOPS_ENV="${ENVIRONMENT}"
 echo "📦 Creating namespace..."
 secuops kubectl -e ${ENVIRONMENT} -- apply -f namespace.yaml
 
-# Check for imagePullSecret
-echo "🔐 Checking for imagePullSecret..."
-if ! secuops kubectl -e ${ENVIRONMENT} -- get secret ghcr-secret -n ${NAMESPACE} &> /dev/null; then
-    echo "⚠️  Warning: imagePullSecret 'ghcr-secret' not found"
-    echo "Creating imagePullSecret is required to pull private images from ghcr.io"
-    echo ""
-    echo "Please run: ./create-image-pull-secret.sh"
-    echo "Or create manually with:"
-    echo "  secuops kubectl -e ${ENVIRONMENT} -- create secret docker-registry ghcr-secret \\"
-    echo "    --namespace=${NAMESPACE} \\"
-    echo "    --docker-server=ghcr.io \\"
-    echo "    --docker-username=<GITHUB_USER> \\"
-    echo "    --docker-password=<GITHUB_PAT> \\"
-    echo "    --docker-email=<EMAIL>"
-    echo ""
-    read -p "Do you want to continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
-else
-    echo "✅ ImagePullSecret found"
-fi
+# Images are now from Harbor OVH (qq9o8vqe.c1.bhs5.container-registry.ovh.net)
+# No imagePullSecret needed - already authenticated on the cluster
 
 # Deploy infrastructure (PostgreSQL, Redis, MinIO)
 echo "💾 Deploying PostgreSQL..."
