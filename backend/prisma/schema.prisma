@@ -292,7 +292,7 @@ model TestSchedule {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  test        Test        @relation(fields: [testId], references: [id], onDelete: Cascade)
+  test        TestSuite   @relation(fields: [testId], references: [id], onDelete: Cascade)
   environment Environment @relation(fields: [environmentId], references: [id], onDelete: Cascade)
 
   @@map("test_schedules")
