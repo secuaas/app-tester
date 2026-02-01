@@ -19,7 +19,7 @@ if ! command -v secuops &> /dev/null; then
 fi
 
 # Get backend pod
-BACKEND_POD=$(secuops get pods -n ${NAMESPACE} -l app=backend -o jsonpath='{.items[0].metadata.name}')
+BACKEND_POD=$(secuops kubectl -e dev -- get pods -n ${NAMESPACE} -l app=backend -o jsonpath='{.items[0].metadata.name}')
 
 if [ -z "$BACKEND_POD" ]; then
     echo "❌ Error: No backend pod found"
@@ -70,7 +70,7 @@ EOF
 
 # Execute the script in the backend pod
 echo "🔧 Creating admin user..."
-secuops exec -n ${NAMESPACE} ${BACKEND_POD} -- sh -c "
+secuops kubectl -e dev -- exec -n ${NAMESPACE} ${BACKEND_POD} -- sh -c "
 cat > /tmp/create-admin.js <<'EOFSCRIPT'
 ${CREATE_ADMIN_SCRIPT}
 EOFSCRIPT

@@ -19,7 +19,7 @@ spec:
   resources:
     requests:
       storage: 20Gi
-  storageClassName: local-path
+  storageClassName: csi-cinder-high-speed
 ---
 apiVersion: v1
 kind: Service
@@ -78,11 +78,11 @@ spec:
               mountPath: /data
           resources:
             requests:
-              memory: "256Mi"
-              cpu: "250m"
+              memory: "128Mi"
+              cpu: "100m"
             limits:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "256Mi"
+              cpu: "200m"
           livenessProbe:
             httpGet:
               path: /minio/health/live
