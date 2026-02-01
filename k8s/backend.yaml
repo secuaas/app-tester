@@ -9,7 +9,7 @@ stringData:
   REDIS_URL: redis://redis:6379
   JWT_SECRET: k8s_jwt_secret_change_in_production_32bytes
   JWT_REFRESH_SECRET: k8s_jwt_refresh_secret_change_prod_32b
-  MASTER_KEY: dGVzdGZvcmdlX21hc3Rlcl9rZXlfazhzX2RldmVsb3BtZW50XzMyYnl0ZXM=
+  MASTER_KEY: dGVzdGZvcmdlX21hc3Rlcl9rZXlfazhzX2Rldl8zMmI=
   MINIO_ACCESS_KEY: testforge
   MINIO_SECRET_KEY: testforge_minio_k8s_password
 ---
