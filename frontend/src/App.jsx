@@ -6,7 +6,9 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Applications from './pages/Applications';
 import Tests from './pages/Tests';
+import TestDetail from './pages/TestDetail';
 import Executions from './pages/Executions';
+import ExecutionDetail from './pages/ExecutionDetail';
 import Credentials from './pages/Credentials';
 
 function App() {
@@ -44,10 +46,28 @@ function App() {
           />
 
           <Route
+            path="/tests/:id"
+            element={
+              <ProtectedRoute>
+                <Layout><TestDetail /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
             path="/executions"
             element={
               <ProtectedRoute>
                 <Layout><Executions /></Layout>
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/executions/:id"
+            element={
+              <ProtectedRoute>
+                <Layout><ExecutionDetail /></Layout>
               </ProtectedRoute>
             }
           />
