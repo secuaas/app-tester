@@ -1,4 +1,4 @@
-import cron from 'node-cron';
+import * as cron from 'node-cron';
 import { PrismaClient } from '@prisma/client';
 import { logger } from '../common/logger';
 
@@ -39,13 +39,10 @@ export class SchedulerService {
         // Create execution
         const execution = await this.prisma.execution.create({
           data: {
-            testId: schedule.testId,
+            testSuiteId: schedule.testId,
             environmentId: schedule.environmentId,
             status: 'PENDING',
-            stepsTotal: 0,
-            stepsCompleted: 0,
-            stepsFailed: 0,
-            triggeredBy: 'SCHEDULE',
+            triggeredBy: 'scheduler',
           },
         });
 

@@ -37,8 +37,8 @@ export class WebhookService {
           event: payload.event,
           status: 'SUCCESS',
           statusCode: response.status,
-          requestPayload: payload,
-          responseBody: response.data,
+          requestPayload: payload as any,
+          responseBody: response.data as any,
         },
       });
 
@@ -52,8 +52,8 @@ export class WebhookService {
           event: payload.event,
           status: 'FAILED',
           statusCode: error.response?.status || 0,
-          requestPayload: payload,
-          responseBody: error.response?.data || error.message,
+          requestPayload: payload as any,
+          responseBody: (error.response?.data || { message: error.message }) as any,
           error: error.message,
         },
       });
