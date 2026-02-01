@@ -58,6 +58,8 @@ spec:
       labels:
         app: backend
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       initContainers:
         - name: wait-for-postgres
           image: busybox:latest
