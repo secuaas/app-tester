@@ -38,6 +38,8 @@ spec:
       labels:
         app: frontend
     spec:
+      imagePullSecrets:
+        - name: harbor-secret
       containers:
         - name: frontend
           image: qq9o8vqe.c1.bhs5.container-registry.ovh.net/secuops/testforge-frontend:latest
