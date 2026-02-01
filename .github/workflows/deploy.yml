@@ -1,0 +1,61 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - dev
+          - prod
+
+jobs:
+  deploy:
+    name: Deploy to k8s-${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install secuops
+        run: |
+          # Installation de secuops (à adapter selon votre méthode d'installation)
+          echo "Installing secuops..."
+          # curl -L https://github.com/secuaas/secuops/releases/latest/download/secuops-linux-amd64 -o /usr/local/bin/secuops
+          # chmod +x /usr/local/bin/secuops
+
+      - name: Deploy to Kubernetes
+        working-directory: ./k8s
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          ./deploy.sh ${{ github.event.inputs.environment }}
+
+      - name: Verify deployment
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          kubectl get pods -n testforge
+          kubectl get svc -n testforge
+          kubectl get ingress -n testforge
+
+      - name: Create admin user
+        if: github.event.inputs.environment == 'dev'
+        working-directory: ./k8s
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+        run: |
+          ./create-admin.sh || echo "Admin user may already exist"
+
+      - name: Deployment summary
+        run: |
+          echo "### Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Environment**: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Frontend**: https://testforge.k8s-${{ github.event.inputs.environment }}.secuaas.ca" >> $GITHUB_STEP_SUMMARY
+          echo "- **Backend API**: https://testforge-backend.k8s-${{ github.event.inputs.environment }}.secuaas.ca" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: ✅ Deployed successfully" >> $GITHUB_STEP_SUMMARY
