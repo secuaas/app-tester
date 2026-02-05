@@ -93,6 +93,9 @@ spec:
                 name: backend-config
             - secretRef:
                 name: backend-secret
+            - secretRef:
+                name: jumpcloud-sso
+                optional: true  # SSO optionnel, ne pas fail si absent
           resources:
             requests:
               memory: "128Mi"

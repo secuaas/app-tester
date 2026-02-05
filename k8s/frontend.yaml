@@ -4,7 +4,8 @@ metadata:
   name: frontend-config
   namespace: testforge
 data:
-  VITE_API_URL: "http://testforge-backend.k8s-dev.secuaas.ca/api/v1"
+  VITE_API_URL: "https://testforge-backend.k8s-dev.secuaas.ca/api/v1"
+  VITE_SSO_ENABLED: "true"
 ---
 apiVersion: v1
 kind: Service
