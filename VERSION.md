@@ -8,7 +8,7 @@
 ## Versions
 
 ### 0.2.0 - 2026-02-05
-**Commit:** `(à venir après commit)`
+**Commit:** `a408752`
 **Type:** Minor - Intégration SSO JumpCloud
 
 **Changements:**
