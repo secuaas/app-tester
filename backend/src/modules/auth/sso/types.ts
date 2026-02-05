@@ -28,8 +28,8 @@ export interface SessionData {
   email: string;
   name: string;
   groups: string[];
-  availableRoles: UserRole[];
-  currentRole?: UserRole;
+  availableRoles: string[];
+  currentRole?: string;
   roleSelected: boolean;
   accessToken: string;
   refreshToken?: string;
@@ -47,8 +47,8 @@ export interface SsoUser {
   email: string;
   name: string;
   groups: string[];
-  availableRoles: UserRole[];
-  currentRole?: UserRole;
+  availableRoles: string[];
+  currentRole?: string;
   roleSelected: boolean;
   sessionId: string;
 }
@@ -56,6 +56,7 @@ export interface SsoUser {
 export interface PkceData {
   codeVerifier: string;
   codeChallenge: string;
+  codeChallengeMethod: string;
 }
 
 export interface AuthorizationUrlResult {
@@ -111,12 +112,36 @@ export interface SsoConfig {
   authorizationEndpoint: string;
   tokenEndpoint: string;
   userInfoEndpoint: string;
-  endSessionEndpoint: string;
+  endSessionEndpoint?: string;
+  revocationEndpoint?: string;
   jwksUri: string;
   scopes: string[];
-  groupMapping: {
-    superAdmin: string;
-    admin: string;
-    user: string;
-  };
+  roleMapping?: Record<string, string>;
+  roleHierarchy?: string[];
+  defaultRole?: string;
+  allowRoleSelection?: boolean;
+  sessionTtlSeconds?: number;
+  sessionCookieName?: string;
+}
+
+export interface RoleOption {
+  name: string;
+  displayName: string;
+  description: string;
+}
+
+export interface OidcDiscoveryResponse {
+  issuer: string;
+  authorization_endpoint: string;
+  token_endpoint: string;
+  userinfo_endpoint: string;
+  jwks_uri: string;
+  end_session_endpoint?: string;
+  revocation_endpoint?: string;
+  scopes_supported: string[];
+  response_types_supported: string[];
+  grant_types_supported: string[];
+  subject_types_supported: string[];
+  id_token_signing_alg_values_supported: string[];
+  token_endpoint_auth_methods_supported: string[];
 }
