@@ -34,6 +34,32 @@ export const config = {
   cors: {
     origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
   },
+
+  sso: {
+    clientId: process.env.JUMPCLOUD_CLIENT_ID || '',
+    clientSecret: process.env.JUMPCLOUD_CLIENT_SECRET || '',
+    orgId: process.env.JUMPCLOUD_ORG_ID || '',
+    callbackUrl: process.env.JUMPCLOUD_CALLBACK_URL || 'http://localhost:3000/auth/sso/callback',
+    issuer: 'https://oauth.id.jumpcloud.com',
+    authorizationEndpoint: 'https://oauth.id.jumpcloud.com/oauth2/auth',
+    tokenEndpoint: 'https://oauth.id.jumpcloud.com/oauth2/token',
+    userInfoEndpoint: 'https://oauth.id.jumpcloud.com/userinfo',
+    jwksUri: 'https://oauth.id.jumpcloud.com/.well-known/jwks.json',
+    endSessionEndpoint: 'https://oauth.id.jumpcloud.com/oauth2/sessions/logout',
+    revocationEndpoint: 'https://oauth.id.jumpcloud.com/oauth2/revoke',
+    scopes: ['openid', 'profile', 'email', 'groups'],
+    roleMapping: {
+      [process.env.SSO_GROUP_SUPER_ADMIN || 'secuaas-super-admins']: 'SUPER_ADMIN',
+      [process.env.SSO_GROUP_ADMIN || 'secuaas-admins']: 'ADMIN',
+      [process.env.SSO_GROUP_USER || 'secuaas-users']: 'USER',
+    },
+    roleHierarchy: ['SUPER_ADMIN', 'ADMIN', 'USER'],
+    defaultRole: 'USER',
+    allowRoleSelection: true,
+    sessionTtlSeconds: 86400, // 24 heures
+    sessionCookieName: 'testforge_sso_session',
+    frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+  },
 };
 
 // Validate required config

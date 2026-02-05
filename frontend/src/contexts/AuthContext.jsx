@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI } from '../services/api';
+import { ssoAPI, isSsoEnabled } from '../services/sso';
 
 const AuthContext = createContext(null);
 
@@ -19,15 +20,36 @@ export const AuthProvider = ({ children }) => {
   // Check if user is logged in on mount
   useEffect(() => {
     const initAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
+      // Si SSO activé, vérifier session SSO
+      if (isSsoEnabled()) {
         try {
-          const { data } = await authAPI.me();
-          setUser(data);
+          const session = await ssoAPI.getSession();
+          if (session) {
+            setUser({
+              id: session.userId,
+              email: session.email,
+              name: session.name,
+              role: session.currentRole,
+              availableRoles: session.availableRoles,
+              roleSelected: session.roleSelected,
+              groups: session.groups,
+            });
+          }
         } catch (err) {
-          console.error('Failed to fetch user:', err);
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
+          console.error('Failed to fetch SSO session:', err);
+        }
+      } else {
+        // Fallback: authentification JWT locale
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          try {
+            const { data } = await authAPI.me();
+            setUser(data);
+          } catch (err) {
+            console.error('Failed to fetch user:', err);
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+          }
         }
       }
       setLoading(false);
@@ -71,6 +93,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Si SSO activé, utiliser logout SSO
+    if (isSsoEnabled()) {
+      ssoAPI.logout();
+      return;
+    }
+
+    // Sinon logout JWT local
     try {
       await authAPI.logout();
     } catch (err) {
@@ -90,7 +119,26 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'ADMIN',
+    isAdmin: user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN',
+    isSsoEnabled: isSsoEnabled(),
+    ssoLogin: ssoAPI.login,
+    selectRole: async (role) => {
+      const result = await ssoAPI.selectRole(role);
+      // Recharge la session après sélection
+      const session = await ssoAPI.getSession();
+      if (session) {
+        setUser({
+          id: session.userId,
+          email: session.email,
+          name: session.name,
+          role: session.currentRole,
+          availableRoles: session.availableRoles,
+          roleSelected: session.roleSelected,
+          groups: session.groups,
+        });
+      }
+      return result;
+    },
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

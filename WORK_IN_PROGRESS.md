@@ -1,10 +1,10 @@
 # Travaux en Cours - TestForge
 
 ## Dernière mise à jour
-2026-02-04 09:00:00
+2026-02-05 15:00:00
 
 ## Version Actuelle
-0.1.0
+0.2.0
 
 ## Demande Actuelle
 Intégrer le module SSO JumpCloud dans TestForge pour remplacer l'authentification JWT locale par une authentification SSO OIDC centralisée.
@@ -19,20 +19,25 @@ Intégrer le module SSO JumpCloud dans TestForge pour remplacer l'authentificati
 - [x] Tous pods Running (5/5) sur k8s-dev
 - [x] Health checks validés
 - [x] Fichiers de suivi décentralisés créés (VERSION.md, WORK_IN_PROGRESS.md)
+- [x] Analyse architecture module SSO JumpCloud existant
+- [x] Adaptation module SSO pour Fastify (services, routes, types)
+- [x] Création services SSO dans backend/src/modules/auth/sso/
+- [x] Intégration OIDC authentication flow avec PKCE
+- [x] Support multi-rôles (SUPER_ADMIN, ADMIN, USER)
+- [x] Routes SSO (/auth/sso/login, /auth/sso/callback, /auth/sso/logout, /auth/sso/role, /auth/sso/session, /auth/sso/roles)
+- [x] Mise à jour frontend pour support SSO (AuthContext, Login, RoleSelection, SsoError)
+- [x] Configuration variables d'environnement JumpCloud (.env.example)
+- [x] Documentation intégration SSO (SSO_INTEGRATION.md)
+- [x] Installation dépendances NPM (@fastify/cookie, jose)
 
 ## Prochaines Étapes
-- [ ] Analyser architecture module SSO JumpCloud existant
-- [ ] Adapter module SSO pour Fastify (actuellement NestJS)
-- [ ] Créer services SSO dans backend/src/modules/auth/sso/
-- [ ] Intégrer OIDC authentication flow
-- [ ] Ajouter support multi-rôles (super-admin, admin, user)
-- [ ] Créer routes SSO (/auth/sso/login, /auth/sso/callback, /auth/sso/logout)
-- [ ] Mettre à jour frontend pour redirection SSO
-- [ ] Configurer variables d'environnement JumpCloud
-- [ ] Tester flow d'authentification complet
-- [ ] Créer utilisateur admin initial (./k8s/create-admin.sh)
-- [ ] Rebuild images et redeploy sur k8s-dev
-- [ ] Documentation intégration SSO
+- [ ] Créer secrets Kubernetes pour JumpCloud (JUMPCLOUD_CLIENT_ID, JUMPCLOUD_CLIENT_SECRET, etc.)
+- [ ] Rebuild images Docker (backend + frontend)
+- [ ] Redeploy sur k8s-dev avec secuops
+- [ ] Tester flow d'authentification SSO complet
+- [ ] Vérifier sélection de rôles multi-rôles
+- [ ] Tester refresh automatique tokens
+- [ ] Valider audit logging SSO
 
 ## Contexte Important
 

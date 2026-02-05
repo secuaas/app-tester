@@ -1,6 +1,7 @@
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
+import cookie from '@fastify/cookie';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { config } from './config';
@@ -30,6 +31,11 @@ export async function buildApp() {
 
   // JWT
   await app.register(jwt, {
+    secret: config.jwt.secret,
+  });
+
+  // Cookie (pour sessions SSO)
+  await app.register(cookie, {
     secret: config.jwt.secret,
   });
 
@@ -93,6 +99,10 @@ export async function buildApp() {
   // Register module routes
   const { authRoutes } = await import('./modules/auth/auth.routes');
   await app.register(authRoutes, { prefix: '/api/v1' });
+
+  // SSO Routes (sans prefix /api/v1 car utilisées pour redirections OAuth)
+  const { ssoRoutes } = await import('./modules/auth/sso.routes');
+  await app.register(ssoRoutes);
 
   const { applicationsRoutes } = await import('./modules/applications/applications.routes');
   await app.register(applicationsRoutes, { prefix: '/api/v1' });

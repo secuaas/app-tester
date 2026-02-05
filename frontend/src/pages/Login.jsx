@@ -5,11 +5,15 @@ import { TestTube2 } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { login, error } = useAuth();
+  const { login, error, isSsoEnabled, ssoLogin } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [localError, setLocalError] = useState('');
+
+  const handleSsoLogin = () => {
+    ssoLogin();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +46,30 @@ export default function Login() {
 
         {/* Login Form */}
         <div className="bg-white py-8 px-6 shadow-xl rounded-xl">
+          {/* SSO Login Button */}
+          {isSsoEnabled && (
+            <div className="mb-6">
+              <button
+                type="button"
+                onClick={handleSsoLogin}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 border-2 border-blue-600 rounded-lg shadow-sm text-sm font-medium text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                </svg>
+                Se connecter avec JumpCloud SSO
+              </button>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">Ou avec email et mot de passe</span>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             {(error || localError) && (
               <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">

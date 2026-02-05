@@ -10,6 +10,8 @@ import TestDetail from './pages/TestDetail';
 import Executions from './pages/Executions';
 import ExecutionDetail from './pages/ExecutionDetail';
 import Credentials from './pages/Credentials';
+import RoleSelection from './pages/RoleSelection';
+import SsoError from './pages/SsoError';
 
 function App() {
   return (
@@ -17,7 +19,9 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
-          
+          <Route path="/auth/role-selection" element={<RoleSelection />} />
+          <Route path="/auth/error" element={<SsoError />} />
+
           <Route
             path="/"
             element={
