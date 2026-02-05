@@ -61,11 +61,14 @@
 - ✅ Cookies sécurisés (httpOnly, secure, sameSite)
 
 **Tests effectués:**
-- ⏳ En attente: Build images Docker
-- ⏳ En attente: Deploy k8s-dev
-- ⏳ En attente: Test flow SSO complet
-- ⏳ En attente: Test sélection rôles
-- ⏳ En attente: Test refresh tokens
+- ✅ Build images Docker réussi (tag: main-103805)
+- ✅ Deploy k8s-dev réussi (7/7 pods Running)
+- ✅ Backend health check OK (version 1.0.0)
+- ✅ Ingress configuré (HTTPS avec Let's Encrypt)
+- ✅ Redis session store connecté
+- ⏳ Test flow SSO complet (en attente credentials JumpCloud)
+- ⏳ Test sélection rôles (en attente credentials JumpCloud)
+- ⏳ Test refresh tokens (en attente credentials JumpCloud)
 
 **Fichiers modifiés/créés:**
 Backend (13 fichiers):
