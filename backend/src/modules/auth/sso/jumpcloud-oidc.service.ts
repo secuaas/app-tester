@@ -153,7 +153,7 @@ export class JumpCloudOidcService {
         email: data.email,
         name: data.name || data.email,
         groups: data.groups || [],
-        rawClaims: data,
+        raw_claims: data,
       };
     } catch (error: any) {
       console.error('Get user info failed:', error.response?.data || error.message);

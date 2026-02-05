@@ -154,7 +154,7 @@ export class AuditService {
     errorMessage?: string;
   }): Promise<AuditEvent> {
     return this.log({
-      eventType: AuditEventType.TOKEN_REFRESH,
+      eventType: AuditEventType.TOKEN_REFRESHED,
       ...params,
     });
   }
