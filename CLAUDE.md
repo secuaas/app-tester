@@ -1,5 +1,19 @@
 # Projet $(basename "$project")
 
+## Contexte Utilisateur et Débugage
+
+**Utilisateur:** Olivier - 25 ans d'expérience, Maîtrise en informatique
+
+### Règles de Débugage
+1. **Ne JAMAIS présumer une erreur utilisateur** - Toujours chercher la cause technique
+2. **Toujours demander/analyser les logs** - Source de vérité pour comprendre les problèmes
+3. **Analyser le code** - Chercher la cause racine, pas des contournements
+4. **Être technique** - L'utilisateur comprend les détails, pas besoin de simplifier
+
+---
+
+
+
 Ce fichier contient les instructions spécifiques pour Claude lors du travail sur ce projet.
 
 
